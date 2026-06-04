@@ -1,0 +1,7 @@
+{
+  "javascript.validate.enable": false,
+  "typescript.validate.enable": false,
+  "js/ts.implicitProjectConfig.checkJs": false,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "editor.semanticHighlighting.enabled": false
+}
