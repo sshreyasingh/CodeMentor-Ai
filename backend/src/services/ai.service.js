@@ -127,7 +127,7 @@ const makeOpenRouterRequest = async (model, messages, temperature = 0.05, maxTok
     headers: {
       'Authorization': `Bearer ${env.openrouterApiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'http://localhost:5173',
+      'HTTP-Referer': env.clientUrl,
       'X-Title': 'CodeMentor AI',
     },
     body: JSON.stringify({
@@ -153,7 +153,7 @@ const reviewCode = async (code, language) => {
   }
 
   // Check if API key is configured
-  if (!env.openrouterApiKey || env.openrouterApiKey === 'your_openrouter_api_key_here') {
+  if (!env.openrouterApiKey) {
     console.error('[AI Service] No OpenRouter API key configured');
     return {
       bugs: [],
@@ -213,7 +213,7 @@ const chatWithAI = async (currentCode, language, question, history = []) => {
   if (!question) return { reply: 'Please ask a question.' };
 
   // Check if API key is configured
-  if (!env.openrouterApiKey || env.openrouterApiKey === 'your_openrouter_api_key_here') {
+  if (!env.openrouterApiKey) {
     console.error('[AI Service] No OpenRouter API key configured');
     return { reply: 'AI assistant is unavailable: No API key configured. Please set OPENROUTER_API_KEY in your .env file' };
   }

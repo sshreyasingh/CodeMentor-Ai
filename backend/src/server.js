@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -13,6 +14,29 @@ const { initializeSocket } = require('./sockets');
 
 const app = express();
 const server = http.createServer(app);
+
+// Graceful shutdown handler
+const gracefulShutdown = () => {
+  console.log('Shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed.');
+    process.exit(0);
+  });
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout.');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
 
 app.set('trust proxy', 1);
 
@@ -38,18 +62,22 @@ app.use(
 );
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-});
-app.use('/api', limiter);
+app.use(
+  '/api',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Logging
-if (env.nodeEnv === 'development') {
+if (env.nodeEnv !== 'production') {
   app.use(morgan('dev'));
 }
 
@@ -70,30 +98,41 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// API 404 — only for /api routes, returns JSON
+app.use('/api', (_req, res) => {
+  res.status(404).json({ message: 'API route not found' });
+});
+
 // In production, serve the frontend build
 if (env.nodeEnv === 'production') {
   const frontendDist = path.resolve(__dirname, '../../frontend/dist');
-  app.use(express.static(frontendDist));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(frontendDist, 'index.html'));
+  if (fs.existsSync(frontendDist)) {
+    app.use(express.static(frontendDist));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(frontendDist, 'index.html'));
+    });
+  } else {
+    console.warn(`Frontend build not found at ${frontendDist}. Run "npm run build" first.`);
+    app.get('*', (_req, res) => {
+      res.status(404).json({ message: 'Frontend not built. Run npm run build.' });
+    });
+  }
+} else {
+  app.use((_req, res) => {
+    res.status(404).json({ message: 'Route not found' });
   });
 }
 
 // Global error handler
 app.use(require('./middleware/error.middleware'));
 
-// 404
-app.use((_req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
-
 const start = async () => {
   if (!env.mongodbUri) {
-    console.error('MONGODB_URI is required. Set it in your .env file.');
+    console.error('MONGODB_URI is required.');
     process.exit(1);
   }
   if (!env.sessionSecret) {
-    console.error('SESSION_SECRET is required. Set it in your .env file.');
+    console.error('SESSION_SECRET is required.');
     process.exit(1);
   }
   await connectDB(env.mongodbUri);
