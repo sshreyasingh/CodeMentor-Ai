@@ -13,11 +13,15 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = useCallback(async () => {
+  const fetchUser = useCallback(async (token) => {
     try {
-      const { data } = await api.get('/auth/me');
+      // Explicitly pass token on first load to avoid race conditions
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : undefined;
+      const { data } = await api.get('/auth/me', config);
       setUser(data.user);
-    } catch {
+      console.log('[Auth] User fetched successfully:', data.user?.name);
+    } catch (err) {
+      console.error('[Auth] Fetch user failed:', err.response?.status, err.message);
       setUser(null);
     } finally {
       setLoading(false);
@@ -25,16 +29,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // Extract token from URL hash (set by backend after OAuth)
+    // Extract token from URL hash (set by backend after OAuth redirect)
     const hash = window.location.hash;
+    let newToken = null;
+
     if (hash.startsWith('#token=')) {
-      const token = hash.substring(7);
-      setStoredToken(token);
-      // Clean up the hash from URL
+      newToken = hash.substring(7);
+      setStoredToken(newToken);
+      console.log('[Auth] Token extracted from URL hash');
+      // Clean the hash from URL without reload
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
-    fetchUser();
+    // Use new token if just extracted, otherwise check localStorage
+    const token = newToken || getStoredToken();
+    console.log('[Auth] Has token in storage:', !!token);
+
+    fetchUser(token);
   }, [fetchUser]);
 
   const logout = async () => {

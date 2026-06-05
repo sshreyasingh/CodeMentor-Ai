@@ -3,12 +3,7 @@ const env = require('../config/env');
 const User = require('../models/user.model');
 
 const auth = async (req, res, next) => {
-  // Check session-based auth first (used when backend serves frontend on same origin)
-  if (req.isAuthenticated && req.isAuthenticated()) {
-    return next();
-  }
-
-  // Check JWT token in Authorization header (used for split deployments)
+  // JWT-first: primary auth method for split deployments (Vercel + Render)
   const header = req.headers.authorization;
   if (header && header.startsWith('Bearer ')) {
     try {
@@ -19,11 +14,17 @@ const auth = async (req, res, next) => {
         req.user = user;
         return next();
       }
-    } catch {
-      // token invalid or expired
+    } catch (err) {
+      console.error('[Auth] JWT verification failed:', err.message);
     }
   }
 
+  // Fallback: session-based auth (same-origin deployment)
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+
+  console.log('[Auth] No valid JWT or session — rejecting');
   return res.status(401).json({ message: 'Authentication required' });
 };
 
