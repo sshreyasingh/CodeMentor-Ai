@@ -1,13 +1,15 @@
-import { createContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { SOCKET_URL } from '../config';
 import { useAuth } from '../hooks/useAuth';
 
 export const SocketContext = createContext(null);
 
+const TOKEN_KEY = 'codementor_token';
+
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -18,11 +20,14 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
+    const token = localStorage.getItem(TOKEN_KEY);
+
     const newSocket = io(SOCKET_URL, {
+      auth: { token },
       withCredentials: true,
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
       reconnectionDelay: 1000,
     });
 

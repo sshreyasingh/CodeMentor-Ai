@@ -1,7 +1,9 @@
 const { Server } = require('socket.io');
+const jwt = require('jsonwebtoken');
 const passport = require('../config/passport');
 const env = require('../config/env');
 const sessionMiddleware = require('../config/session');
+const User = require('../models/user.model');
 const chatHandler = require('./chat.handler');
 
 const initializeSocket = (server) => {
@@ -12,6 +14,7 @@ const initializeSocket = (server) => {
     },
     pingTimeout: 60000,
     pingInterval: 25000,
+    transports: ['websocket', 'polling'],
   });
 
   const wrap = (middleware) => (socket, next) =>
@@ -21,16 +24,36 @@ const initializeSocket = (server) => {
   io.use(wrap(passport.initialize()));
   io.use(wrap(passport.session()));
 
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
+    // Try Passport session first (same-origin deployment)
     const user = socket.request.user;
     if (user) {
       socket.userId = user.id;
       socket.userName = user.name;
       socket.userAvatar = user.avatar || '';
-      console.log(`[Socket Auth] Authenticated: ${user.name} (${user.id})`);
+      console.log(`[Socket Auth] Session: ${user.name} (${user.id})`);
       return next();
     }
-    console.log('[Socket Auth] Authentication failed - no user in session');
+
+    // Try JWT token from query param (split deployments — frontend passes token)
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, env.jwtSecret);
+        const dbUser = await User.findById(decoded.userId);
+        if (dbUser) {
+          socket.userId = dbUser.id;
+          socket.userName = dbUser.name;
+          socket.userAvatar = dbUser.avatar || '';
+          console.log(`[Socket Auth] JWT: ${dbUser.name} (${dbUser.id})`);
+          return next();
+        }
+      } catch (err) {
+        console.error('[Socket Auth] JWT verification failed:', err.message);
+      }
+    }
+
+    console.log('[Socket Auth] Failed — no session or valid JWT');
     next(new Error('Authentication required'));
   });
 
