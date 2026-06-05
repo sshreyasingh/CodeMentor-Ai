@@ -60,18 +60,16 @@ npm run dev
 ### Backend
 
 ```env
-MONGODB_URI=
-JWT_SECRET=
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
-OPENROUTER_API_KEY=
-CLIENT_URL=
+MONGODB_URI=mongodb_url
+GITHUB_CLIENT_ID=github_client_id
+GITHUB_CLIENT_SECRET=github_client_secret
+CLIENT_URL=client_url
 ```
 
 ### Frontend
 
 ```env
-VITE_API_URL=
+VITE_API_URL=vite_api_url
 ```
 
 ## 🚀 Live Demo
