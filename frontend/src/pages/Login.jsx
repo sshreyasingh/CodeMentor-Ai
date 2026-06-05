@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Box, Typography, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import { GITHUB_AUTH_URL } from '../config';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -10,7 +11,7 @@ const Login = () => {
   const handleLogin = () => {
     const redirect = searchParams.get('redirect');
     if (redirect) sessionStorage.setItem('loginRedirect', redirect);
-    window.location.href = '/api/v1/auth/github';
+    window.location.href = GITHUB_AUTH_URL;
   };
 
   useEffect(() => {
