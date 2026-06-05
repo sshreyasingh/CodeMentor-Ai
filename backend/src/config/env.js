@@ -8,6 +8,7 @@ module.exports = {
   nodeEnv: process.env.NODE_ENV || 'development',
   mongodbUri: process.env.MONGODB_URI || '',
   sessionSecret: process.env.SESSION_SECRET || '',
+  jwtSecret: process.env.JWT_SECRET || process.env.SESSION_SECRET || '',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
   openrouterApiKey: process.env.OPENROUTER_API_KEY || '',
   groqApiKey: process.env.GROQ_API_KEY || '',

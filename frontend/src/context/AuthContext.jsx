@@ -1,40 +1,49 @@
-import { createContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 
 export const AuthContext = createContext(null);
 
+const TOKEN_KEY = 'codementor_token';
+
+const getStoredToken = () => localStorage.getItem(TOKEN_KEY);
+const setStoredToken = (token) => localStorage.setItem(TOKEN_KEY, token);
+const removeStoredToken = () => localStorage.removeItem(TOKEN_KEY);
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const retries = useRef(0);
-  const maxRetries = 3;
 
   const fetchUser = useCallback(async () => {
     try {
       const { data } = await api.get('/auth/me');
       setUser(data.user);
-      setLoading(false);
-      retries.current = 0;
-    } catch (err) {
-      // After OAuth redirect, the session cookie may not be fully
-      // set yet — retry a few times before giving up
-      if (retries.current < maxRetries) {
-        retries.current++;
-        setTimeout(fetchUser, 1000);
-        return;
-      }
+    } catch {
       setUser(null);
+    } finally {
       setLoading(false);
-      retries.current = 0;
     }
   }, []);
 
   useEffect(() => {
+    // Extract token from URL hash (set by backend after OAuth)
+    const hash = window.location.hash;
+    if (hash.startsWith('#token=')) {
+      const token = hash.substring(7);
+      setStoredToken(token);
+      // Clean up the hash from URL
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
     fetchUser();
   }, [fetchUser]);
 
   const logout = async () => {
-    await api.post('/auth/logout');
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // ignore
+    }
+    removeStoredToken();
     setUser(null);
   };
 

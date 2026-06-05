@@ -1,4 +1,5 @@
 const passport = require('../config/passport');
+const jwt = require('jsonwebtoken');
 const env = require('../config/env');
 
 exports.githubAuth = passport.authenticate('github', {
@@ -13,15 +14,21 @@ exports.githubCallback = (req, res, next) => {
     req.logIn(user, (loginErr) => {
       if (loginErr) return next(loginErr);
 
-      req.session.save((_saveErr) => {
-        return res.redirect(`${env.clientUrl}/dashboard`);
-      });
+      // Generate JWT so the frontend can authenticate without cookies
+      const token = jwt.sign(
+        { userId: user.id, name: user.name, avatar: user.avatar },
+        env.jwtSecret,
+        { expiresIn: '7d' }
+      );
+
+      // Send token in URL hash — the frontend extracts and stores it
+      return res.redirect(`${env.clientUrl}/dashboard#token=${token}`);
     });
   })(req, res, next);
 };
 
 exports.getMe = (req, res) => {
-  if (!req.isAuthenticated || !req.isAuthenticated()) {
+  if (!req.user) {
     return res.status(401).json({ message: 'Not authenticated' });
   }
   res.json({ user: req.user });
