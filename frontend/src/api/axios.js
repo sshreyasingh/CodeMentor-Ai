@@ -11,7 +11,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (window.location.pathname !== '/login') {
+      const isLoginPage = window.location.pathname === '/login';
+      if (!isLoginPage) {
         window.location.href = '/login';
       }
     }
