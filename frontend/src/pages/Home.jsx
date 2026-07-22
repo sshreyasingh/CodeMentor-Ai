@@ -6,7 +6,6 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CodeIcon from '@mui/icons-material/Code';
 import BoltIcon from '@mui/icons-material/Bolt';
 import GroupIcon from '@mui/icons-material/Group';
-import GitHubIcon from '@mui/icons-material/GitHub';
 import SecurityIcon from '@mui/icons-material/Security';
 import SpeedIcon from '@mui/icons-material/Speed';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -52,10 +51,10 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: '5+', label: 'Languages' },
-  { value: 'Real-Time', label: 'Sync' },
-  { value: 'AI', label: 'Powered' },
-  { value: '24/7', label: 'Available' },
+  { value: '5+', label: 'Languages', color: '#818cf8' },
+  { value: 'Real-Time', label: 'Sync', color: '#22d3ee' },
+  { value: 'AI', label: 'Powered', color: '#a855f7' },
+  { value: '24/7', label: 'Available', color: '#22c55e' },
 ];
 
 const AnimatedBackground = () => {
@@ -74,19 +73,23 @@ const AnimatedBackground = () => {
     resize();
     window.addEventListener('resize', resize);
 
-    const particles = Array.from({ length: 60 }, () => ({
+    const particles = Array.from({ length: 80 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       r: Math.random() * 1.5 + 0.5,
       vx: (Math.random() - 0.5) * 0.3,
       vy: (Math.random() - 0.5) * 0.3,
-      opacity: Math.random() * 0.4 + 0.1,
+      opacity: Math.random() * 0.5 + 0.1,
+      hue: Math.random() > 0.5 ? '129,140,248' : '34,211,238',
     }));
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const gradient = ctx.createRadialGradient(canvas.width * 0.3, canvas.height * 0.2, 0, canvas.width * 0.5, canvas.height * 0.5, canvas.width * 0.6);
+      const gradient = ctx.createRadialGradient(
+        canvas.width * 0.3, canvas.height * 0.15, 0,
+        canvas.width * 0.5, canvas.height * 0.5, canvas.width * 0.6
+      );
       gradient.addColorStop(0, 'rgba(129,140,248,0.04)');
       gradient.addColorStop(0.5, 'rgba(34,211,238,0.02)');
       gradient.addColorStop(1, 'transparent');
@@ -103,7 +106,7 @@ const AnimatedBackground = () => {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(129,140,248,${p.opacity})`;
+        ctx.fillStyle = `rgba(${p.hue},${p.opacity})`;
         ctx.fill();
 
         particles.slice(i + 1).forEach((p2) => {
@@ -114,7 +117,7 @@ const AnimatedBackground = () => {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(129,140,248,${0.04 * (1 - dist / 100)})`;
+            ctx.strokeStyle = `rgba(${p.hue},${0.04 * (1 - dist / 100)})`;
             ctx.stroke();
           }
         });
@@ -312,18 +315,43 @@ const Home = () => {
           pb: { xs: 8, md: 10 },
         }}
       >
-        {/* Animated glow orb */}
+        {/* Colored glow orbs */}
         <Box
           sx={{
             position: 'absolute',
-            top: '15%',
-            left: '50%',
-            width: 600,
-            height: 600,
-            transform: 'translate(-50%, -50%)',
+            top: '5%',
+            left: '40%',
+            width: 500,
+            height: 500,
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(129,140,248,0.12) 0%, rgba(34,211,238,0.05) 30%, transparent 60%)',
-            filter: 'blur(40px)',
+            background: 'radial-gradient(circle, rgba(129,140,248,0.15) 0%, transparent 60%)',
+            filter: 'blur(60px)',
+            pointerEvents: 'none',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '20%',
+            right: '10%',
+            width: 350,
+            height: 350,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 55%)',
+            filter: 'blur(50px)',
+            pointerEvents: 'none',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: '10%',
+            left: '15%',
+            width: 400,
+            height: 400,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 55%)',
+            filter: 'blur(50px)',
             pointerEvents: 'none',
           }}
         />
@@ -381,7 +409,7 @@ const Home = () => {
               <Box
                 component="span"
                 sx={{
-                  background: 'linear-gradient(135deg, #a5b4fc 0%, #67e8f9 40%, #818cf8 70%, #c084fc 100%)',
+                  background: 'linear-gradient(135deg, #a5b4fc 0%, #67e8f9 40%, #c084fc 70%, #f472b6 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundSize: '200% 200%',
@@ -438,33 +466,15 @@ const Home = () => {
                 Open Dashboard
               </Button>
             ) : (
-              <>
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<GitHubIcon />}
-                  onClick={() => (window.location.href = '/api/v1/auth/github')}
-                  sx={{
-                    px: 5,
-                    py: 1.75,
-                    fontSize: 16,
-                    borderRadius: 12,
-                    bgcolor: '#24292e',
-                    '&:hover': { bgcolor: '#1b1f23', transform: 'translateY(-2px)' },
-                  }}
-                >
-                  Login with GitHub
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  endIcon={<ArrowForwardIcon />}
-                  onClick={() => navigate('/login')}
-                  sx={{ px: 5, py: 1.75, fontSize: 16, borderRadius: 12 }}
-                >
-                  Learn More
-                </Button>
-              </>
+              <Button
+                variant="outlined"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate('/login')}
+                sx={{ px: 5, py: 1.75, fontSize: 16, borderRadius: 12 }}
+              >
+                Learn More
+              </Button>
             )}
           </Box>
 
@@ -478,7 +488,15 @@ const Home = () => {
                 viewport={{ once: true }}
                 transition={{ delay: 0.6 + i * 0.1, duration: 0.4 }}
               >
-                <Typography variant="h3" fontWeight={800} sx={{ color: '#FFFFFF', fontSize: { xs: 28, md: 32 }, mb: 0.5 }}>
+                <Typography
+                  variant="h3"
+                  fontWeight={800}
+                  sx={{
+                    color: stat.color,
+                    fontSize: { xs: 28, md: 32 },
+                    mb: 0.5,
+                  }}
+                >
                   {stat.value}
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#64748B', fontSize: 13 }}>
@@ -492,6 +510,34 @@ const Home = () => {
 
       {/* ── Code Preview Section ── */}
       <Box sx={{ position: 'relative', zIndex: 1, px: 3, pb: 10, pt: 4 }}>
+        {/* Section accent blobs */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '-10%',
+            width: 300,
+            height: 300,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(34,211,238,0.08) 0%, transparent 60%)',
+            filter: 'blur(40px)',
+            pointerEvents: 'none',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '20%',
+            right: '-5%',
+            width: 250,
+            height: 250,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 60%)',
+            filter: 'blur(35px)',
+            pointerEvents: 'none',
+          }}
+        />
+
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -524,6 +570,34 @@ const Home = () => {
 
       {/* ── Features Grid Section ── */}
       <Box sx={{ position: 'relative', zIndex: 1, pb: 10, pt: 4 }}>
+        {/* Section accent blobs */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '10%',
+            left: '20%',
+            width: 400,
+            height: 400,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(129,140,248,0.06) 0%, transparent 60%)',
+            filter: 'blur(50px)',
+            pointerEvents: 'none',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: '5%',
+            right: '10%',
+            width: 350,
+            height: 350,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(236,72,153,0.05) 0%, transparent 55%)',
+            filter: 'blur(45px)',
+            pointerEvents: 'none',
+          }}
+        />
+
         <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0 }}
@@ -531,6 +605,28 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
+            {/* Section badge */}
+            <Box sx={{ textAlign: 'center', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 8,
+                  bgcolor: 'rgba(34,211,238,0.08)',
+                  border: '1px solid rgba(34,211,238,0.15)',
+                  mb: 3,
+                }}
+              >
+                <BoltIcon sx={{ fontSize: 14, color: '#22d3ee' }} />
+                <Typography variant="caption" fontWeight={600} sx={{ color: '#67e8f9', fontSize: 11, letterSpacing: 1 }}>
+                  POWERED BY DEEPSEEK R1
+                </Typography>
+              </Box>
+            </Box>
+
             <Typography
               variant="h4"
               fontWeight={700}
@@ -569,6 +665,22 @@ const Home = () => {
 
       {/* ── Bottom CTA Section ── */}
       <Box sx={{ position: 'relative', zIndex: 1, pb: 12, pt: 4 }}>
+        {/* Ambient glows */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '30%',
+            left: '50%',
+            width: 600,
+            height: 400,
+            transform: 'translate(-50%, -50%)',
+            borderRadius: '50%',
+            background: 'radial-gradient(ellipse, rgba(129,140,248,0.1) 0%, rgba(34,211,238,0.04) 40%, transparent 65%)',
+            filter: 'blur(60px)',
+            pointerEvents: 'none',
+          }}
+        />
+
         <Container maxWidth="md">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -598,6 +710,19 @@ const Home = () => {
                   bottom: 0,
                   background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(129,140,248,0.08) 0%, transparent 60%)',
                   pointerEvents: 'none',
+                }}
+              />
+              {/* Decorative top bar */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 120,
+                  height: 3,
+                  borderRadius: '0 0 3px 3px',
+                  background: 'linear-gradient(90deg, #818cf8, #22d3ee, #a855f7)',
                 }}
               />
               <Typography
@@ -644,26 +769,15 @@ const Home = () => {
                     Open Dashboard
                   </Button>
                 ) : (
-                  <>
-                    <Button
-                      variant="contained"
-                      size="large"
-                      startIcon={<GitHubIcon />}
-                      onClick={() => (window.location.href = '/api/v1/auth/github')}
-                      sx={{ px: 5, py: 1.75, fontSize: 16, borderRadius: 12, bgcolor: '#24292e', '&:hover': { bgcolor: '#1b1f23' } }}
-                    >
-                      Login with GitHub
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="large"
-                      endIcon={<ArrowForwardIcon />}
-                      onClick={() => navigate('/login')}
-                      sx={{ px: 4, py: 1.75, fontSize: 16, borderRadius: 12 }}
-                    >
-                      Learn More
-                    </Button>
-                  </>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    onClick={() => navigate('/login')}
+                    sx={{ px: 4, py: 1.75, fontSize: 16, borderRadius: 12 }}
+                  >
+                    Learn More
+                  </Button>
                 )}
               </Box>
             </Box>
