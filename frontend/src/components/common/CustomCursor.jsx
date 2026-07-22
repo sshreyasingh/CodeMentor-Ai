@@ -4,15 +4,19 @@ import { Box } from '@mui/material';
 const CustomCursor = () => {
   const dotRef = useRef(null);
   const ringRef = useRef(null);
-  const posRef = useRef({ x: 0, y: 0 });
-  const targetRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    let rafId;
-
     const onMove = (e) => {
-      targetRef.current.x = e.clientX;
-      targetRef.current.y = e.clientY;
+      const x = e.clientX;
+      const y = e.clientY;
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate(${x - 5}px, ${y - 5}px)`;
+      }
+      if (ringRef.current) {
+        const ringSize = ringRef.current.style.width === '40px' ? 20 : 14;
+        ringRef.current.style.transform = `translate(${x - ringSize}px, ${y - ringSize}px)`;
+      }
     };
 
     const isClickable = (el) => {
@@ -26,8 +30,7 @@ const CustomCursor = () => {
     };
 
     const onOver = (e) => {
-      const el = e.target;
-      if (isClickable(el) && ringRef.current) {
+      if (isClickable(e.target) && ringRef.current) {
         ringRef.current.style.width = '40px';
         ringRef.current.style.height = '40px';
         ringRef.current.style.borderColor = 'rgba(129,140,248,0.4)';
@@ -35,7 +38,7 @@ const CustomCursor = () => {
       }
     };
 
-    const onOut = (e) => {
+    const onOut = () => {
       if (ringRef.current) {
         ringRef.current.style.width = '28px';
         ringRef.current.style.height = '28px';
@@ -44,36 +47,14 @@ const CustomCursor = () => {
       }
     };
 
-    const animate = () => {
-      const tx = targetRef.current.x;
-      const ty = targetRef.current.y;
-      posRef.current.x += (tx - posRef.current.x) * 0.12;
-      posRef.current.y += (ty - posRef.current.y) * 0.12;
-
-      const x = posRef.current.x;
-      const y = posRef.current.y;
-
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate(${x - 5}px, ${y - 5}px)`;
-      }
-      if (ringRef.current) {
-        const ringSize = ringRef.current.style.width === '40px' ? 20 : 14;
-        ringRef.current.style.transform = `translate(${x - ringSize}px, ${y - ringSize}px)`;
-      }
-
-      rafId = requestAnimationFrame(animate);
-    };
-
     window.addEventListener('mousemove', onMove, { passive: true });
     document.addEventListener('mouseover', onOver, true);
     document.addEventListener('mouseout', onOut, true);
-    rafId = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseover', onOver, true);
       document.removeEventListener('mouseout', onOut, true);
-      cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -92,7 +73,8 @@ const CustomCursor = () => {
           bgcolor: 'rgba(129,140,248,0.04)',
           pointerEvents: 'none',
           zIndex: 9999,
-          transition: 'width 0.2s, height 0.2s, border-color 0.2s, background-color 0.2s',
+          transition: 'width 0.15s, height 0.15s, border-color 0.15s, background-color 0.15s',
+          willChange: 'transform',
         }}
       />
       <Box
@@ -108,6 +90,7 @@ const CustomCursor = () => {
           boxShadow: '0 0 8px rgba(129,140,248,0.6), 0 0 16px rgba(129,140,248,0.25)',
           pointerEvents: 'none',
           zIndex: 10000,
+          willChange: 'transform',
         }}
       />
     </>
