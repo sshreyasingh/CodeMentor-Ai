@@ -1,7 +1,7 @@
 import { Box, Typography, Button, Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CodeIcon from '@mui/icons-material/Code';
 import BoltIcon from '@mui/icons-material/Bolt';
@@ -50,11 +50,30 @@ const FEATURES = [
   },
 ];
 
+const HUE_POOL = [
+  '129,140,248',  // indigo
+  '34,211,238',   // cyan
+  '168,85,247',   // violet
+  '236,72,153',   // pink
+  '34,197,94',    // green
+  '245,158,11',   // amber
+];
+
+const STATS_COLORS = [
+  ['#818cf8', '#22d3ee', '#a855f7', '#22c55e'],
+  ['#a855f7', '#ec4899', '#22d3ee', '#818cf8'],
+  ['#22d3ee', '#22c55e', '#ec4899', '#a855f7'],
+  ['#ec4899', '#818cf8', '#22c55e', '#22d3ee'],
+  ['#22c55e', '#a855f7', '#818cf8', '#ec4899'],
+];
+
+const STATS_INTERVAL_MS = 3000;
+
 const STATS = [
-  { value: '5+', label: 'Languages', color: '#818cf8' },
-  { value: 'Real-Time', label: 'Sync', color: '#22d3ee' },
-  { value: 'AI', label: 'Powered', color: '#a855f7' },
-  { value: '24/7', label: 'Available', color: '#22c55e' },
+  { value: '5+', label: 'Languages' },
+  { value: 'Real-Time', label: 'Sync' },
+  { value: 'AI', label: 'Powered' },
+  { value: '24/7', label: 'Available' },
 ];
 
 const AnimatedBackground = () => {
@@ -73,14 +92,14 @@ const AnimatedBackground = () => {
     resize();
     window.addEventListener('resize', resize);
 
-    const particles = Array.from({ length: 80 }, () => ({
+    const particles = Array.from({ length: 200 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       r: Math.random() * 1.5 + 0.5,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
       opacity: Math.random() * 0.5 + 0.1,
-      hue: Math.random() > 0.5 ? '129,140,248' : '34,211,238',
+      hue: HUE_POOL[Math.floor(Math.random() * HUE_POOL.length)],
     }));
 
     const draw = () => {
@@ -295,6 +314,16 @@ const Home = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const ref = useRef(null);
+  const [colorIndex, setColorIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setColorIndex((prev) => (prev + 1) % STATS_COLORS.length);
+    }, STATS_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentColors = STATS_COLORS[colorIndex];
 
   return (
     <Box ref={ref} sx={{ position: 'relative', overflow: 'hidden' }}>
@@ -492,9 +521,10 @@ const Home = () => {
                   variant="h3"
                   fontWeight={800}
                   sx={{
-                    color: stat.color,
+                    color: currentColors[i],
                     fontSize: { xs: 28, md: 32 },
                     mb: 0.5,
+                    transition: 'color 1s ease',
                   }}
                 >
                   {stat.value}
