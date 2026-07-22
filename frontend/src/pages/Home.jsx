@@ -40,7 +40,6 @@ const Home = () => {
           ) : (
             <>
               <Button variant="contained" size="large" startIcon={<GitHubIcon />} onClick={() => window.location.href = '/api/v1/auth/github'} sx={{ px: 5, py: 1.75, fontSize: 16, bgcolor: '#24292e', borderRadius: 12, '&:hover': { bgcolor: '#1b1f23', transform: 'translateY(-2px)' } }}>Login with GitHub</Button>
-              <Button variant="outlined" size="large" endIcon={<ArrowForwardIcon />} onClick={() => navigate('/login')} sx={{ px: 5, py: 1.75, fontSize: 16, borderRadius: 12 }}>Learn More</Button>
             </>
           )}
         </Box>

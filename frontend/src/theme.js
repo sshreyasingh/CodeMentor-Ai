@@ -44,6 +44,8 @@ const theme = createTheme({
         '::-webkit-scrollbar': { width: 6, height: 6 },
         '::-webkit-scrollbar-track': { background: 'transparent' },
         '::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.08)', borderRadius: 3, '&:hover': { background: 'rgba(255,255,255,0.14)' } },
+        '*:focus-visible': { outline: '2px solid #818cf8', outlineOffset: 2, borderRadius: 4 },
+        html: { scrollbarGutter: 'stable' },
       },
     },
     MuiCard: {
@@ -88,6 +90,43 @@ const theme = createTheme({
     MuiDrawer: { styleOverrides: { paper: { backgroundImage: 'none', backgroundColor: '#080c17', border: 'none' } } },
     MuiTab: { styleOverrides: { root: { textTransform: 'none', fontWeight: 500, fontSize: 13, minHeight: 44, '&.Mui-selected': { fontWeight: 600 } } } },
     MuiLinearProgress: { styleOverrides: { root: { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 4 } } },
+    MuiSkeleton: {
+      styleOverrides: {
+        root: { backgroundColor: 'rgba(255,255,255,0.04)' },
+      },
+    },
+    MuiAlert: {
+      styleOverrides: {
+        root: { borderRadius: 12 },
+        filledError: {
+          backgroundColor: 'rgba(239,68,68,0.15)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid rgba(239,68,68,0.25)',
+          color: '#fca5a5',
+        },
+        filledSuccess: {
+          backgroundColor: 'rgba(34,197,94,0.15)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid rgba(34,197,94,0.25)',
+          color: '#86efac',
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: 'rgba(12,18,35,0.95)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 8,
+          fontSize: 12,
+          padding: '6px 12px',
+        },
+      },
+    },
   },
 });
 

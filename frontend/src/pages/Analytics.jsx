@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Box, LinearProgress, CircularProgress } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, Typography, Box, LinearProgress, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import BugReportIcon from '@mui/icons-material/BugReport';
@@ -8,6 +9,9 @@ import InsightsIcon from '@mui/icons-material/Insights';
 import api from '../api/axios';
 import StatCard from '../components/common/StatCard';
 import CircularScore from '../components/common/CircularScore';
+import { SkeletonCard, SkeletonChart, SkeletonText } from '../components/common/SkeletonLoader';
+import ErrorDisplay from '../components/common/ErrorDisplay';
+import EmptyState from '../components/common/EmptyState';
 
 const MiniTrendChart = ({ data, color }) => {
   if (!data?.length || data.every(d => d.score === 0)) return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 80, mt: 2 }}><Typography variant="body2" sx={{ color: '#64748B' }}>No data yet</Typography></Box>;
@@ -20,14 +24,69 @@ const MiniTrendChart = ({ data, color }) => {
 const Analytics = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  useEffect(()=>{(async()=>{try{setLoading(true);const{data}=await api.get('/analytics/stats');setStats(data);}catch{}finally{setLoading(false);}})();},[]);
+  const [error, setError] = useState('');
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const { data } = await api.get('/analytics/stats');
+      setStats(data);
+    } catch {
+      setError('Failed to load analytics');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchStats(); }, [fetchStats]);
+
+  if (error) return <ErrorDisplay message={error} onRetry={fetchStats} fullPage />;
+
+  if (loading) {
+    return (
+      <Box sx={{ display:'flex',flexDirection:'column',gap:3,p:{xs:2,md:4},maxWidth:1440,mx:'auto',width:'100%' }}>
+        <Box>
+          <SkeletonText lines={2} lineWidths={['30%', '45%']} />
+        </Box>
+        <Box sx={{ display:'flex',gap:3,flexWrap:'wrap' }}>
+          {[0,1,2,3].map(i=><Box key={i} sx={{ flex:'1 1 220px',minWidth:0 }}><SkeletonCard lines={2} height={48}/></Box>)}
+        </Box>
+        <Box sx={{ display:'flex',gap:3,flexWrap:'wrap' }}>
+          <Box sx={{ flex:'1.5 1 380px',minWidth:0 }}><SkeletonChart height={150}/></Box>
+          <Box sx={{ flex:'1 1 260px',minWidth:0 }}><SkeletonCard lines={4} height={140}/></Box>
+        </Box>
+        <SkeletonCard lines={3} height={100} />
+        <SkeletonCard lines={6} height={80} />
+      </Box>
+    );
+  }
+
+  if (stats && stats.totalReviews === 0) {
+    return (
+      <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1440, mx: 'auto', width: '100%' }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h3" fontWeight={700} sx={{ color:'#FFFFFF',letterSpacing:'-0.03em' }}><InsightsIcon sx={{ mr:1.5,verticalAlign:'middle',fontSize:32 }}/> Analytics</Typography>
+        </Box>
+        <EmptyState
+          icon={<InsightsIcon sx={{ fontSize: 36 }} />}
+          title="No analytics yet"
+          description="Complete code reviews to see your quality trends and performance metrics"
+          action={
+            <Button variant="contained" size="large" component={Link} to="/rooms" sx={{ borderRadius: 10, px: 4 }}>
+              Find a Room
+            </Button>
+          }
+        />
+      </Box>
+    );
+  }
 
   const topStats = stats ? [{title:'Total Reviews',value:stats.totalReviews,icon:<RateReviewIcon/>,color:'#818cf8',subtitle:stats.totalReviews>0?`${stats.totalReviews} submissions analyzed`:'No reviews yet'},{title:'Bugs Found',value:stats.totalBugs,icon:<BugReportIcon/>,color:'#ef4444',subtitle:stats.totalBugs>0?`${stats.totalBugs} issues detected`:'No bugs found yet'},{title:'Avg Quality',value:stats.avgQualityScore>0?`${stats.avgQualityScore}%`:'--',icon:<TrendingUpIcon/>,color:'#22c55e',subtitle:stats.avgQualityScore>0?'Overall readability score':'No data yet'},{title:'Active Rooms',value:stats.activeRooms,icon:<InsightsIcon/>,color:'#22d3ee',subtitle:stats.activeRooms>0?`${stats.activeRooms} rooms you're in`:'Join a room'}] : [];
   const perf = stats ? [{value:stats.metrics?.codeQuality||0,color:'#22c55e',label:'Code Quality'},{value:stats.metrics?.security||0,color:'#f59e0b',label:'Security'},{value:stats.metrics?.maintainability||0,color:'#818cf8',label:'Maintainability'}] : [];
   const details = stats ? [{label:'Test Coverage',value:stats.metrics?.testCoverage||0,color:'#22c55e'},{label:'Documentation',value:stats.metrics?.documentation||0,color:'#f59e0b'},{label:'Linting',value:stats.metrics?.lintingCompliance||0,color:'#818cf8'},{label:'Response Time',value:stats.metrics?.responseTime||0,color:'#22d3ee'},{label:'Dependencies',value:stats.metrics?.dependencyHealth||0,color:'#a855f7'},{label:'Duplication',value:stats.metrics?.codeDuplication||0,color:'#ef4444',invert:true}] : [];
   const bugs = stats ? [{label:'Critical',count:stats.bugSeverity?.high||0,color:'#ef4444'},{label:'Medium',count:stats.bugSeverity?.medium||0,color:'#f59e0b'},{label:'Low',count:stats.bugSeverity?.low||0,color:'#818cf8'}] : [];
   const trend = stats?.trendData||[], hasData = stats && stats.totalReviews > 0;
-  if(loading) return <Box sx={{ display:'flex',justifyContent:'center',height:'50vh',alignItems:'center' }}><CircularProgress/></Box>;
 
   return (
     <Box sx={{ display:'flex',flexDirection:'column',gap:3,p:{xs:2,md:4},maxWidth:1440,mx:'auto',width:'100%' }}>
