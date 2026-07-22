@@ -74,9 +74,9 @@ const Sidebar = () => {
 
   return (
     <>
-      {isMobile && <IconButton onClick={() => setMobileOpen(true)} sx={{ position: 'fixed', top: 12, left: 12, zIndex: 1200, bgcolor: 'rgba(12,18,35,0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 2 }}><MenuIcon /></IconButton>}
+      {isMobile && <IconButton onClick={() => setMobileOpen(true)} sx={{ position: 'fixed', top: 12, left: 12, zIndex: 1200, bgcolor: 'rgba(12,18,35,0.9)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 2, '&:hover': { bgcolor: 'rgba(12,18,35,0.95)' } }}><MenuIcon /></IconButton>}
       {isMobile ? (
-        <Drawer open={mobileOpen} onClose={() => setMobileOpen(false)} sx={{ '& .MuiDrawer-paper': { width: DRAWER_WIDTH } }}>{drawerContent}</Drawer>
+        <Drawer open={mobileOpen} onClose={() => setMobileOpen(false)} slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)', bgcolor: 'rgba(0,0,0,0.6)' } } }} sx={{ '& .MuiDrawer-paper': { width: DRAWER_WIDTH } }}>{drawerContent}</Drawer>
       ) : (
         <Drawer variant="permanent" sx={{ width: DRAWER_WIDTH, flexShrink: 0, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box', borderRight: '1px solid rgba(255,255,255,0.06)' } }}>{drawerContent}</Drawer>
       )}

@@ -1,14 +1,17 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Alert, CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { GITHUB_AUTH_URL } from '../config';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
+  const [loggingIn, setLoggingIn] = useState(false);
+  const errorParam = searchParams.get('error');
 
   const handleLogin = () => {
+    setLoggingIn(true);
     const redirect = searchParams.get('redirect');
     if (redirect) sessionStorage.setItem('loginRedirect', redirect);
     window.location.href = GITHUB_AUTH_URL;
@@ -28,7 +31,30 @@ const Login = () => {
           </Box>
           <Typography variant="h4" fontWeight={700} gutterBottom>Welcome back</Typography>
           <Typography variant="body1" sx={{ color: '#94A3B8', mb: 5, lineHeight: 1.6 }}>Sign in with your GitHub account to access collaborative rooms, AI reviews, and your dashboard.</Typography>
-          <Button fullWidth size="large" startIcon={<GitHubIcon />} onClick={handleLogin} sx={{ bgcolor: '#24292e', '&:hover': { bgcolor: '#1b1f23' }, py: 1.75, fontSize: 16, borderRadius: 12, fontWeight: 600 }}>Login with GitHub</Button>
+
+          {errorParam && (
+            <Alert severity="error" sx={{ mb: 2.5 }}>
+              Authentication failed. Please try again.
+            </Alert>
+          )}
+
+          <Button
+            fullWidth
+            size="large"
+            startIcon={loggingIn ? <CircularProgress size={20} sx={{ color: '#94A3B8' }} /> : <GitHubIcon />}
+            onClick={handleLogin}
+            disabled={loggingIn}
+            sx={{
+              bgcolor: '#24292e',
+              '&:hover': { bgcolor: '#1b1f23' },
+              py: 1.75,
+              fontSize: 16,
+              borderRadius: 12,
+              fontWeight: 600,
+            }}
+          >
+            {loggingIn ? 'Redirecting to GitHub...' : 'Login with GitHub'}
+          </Button>
           <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 2.5 }}>No password needed. We'll never post without your permission.</Typography>
         </Box>
       </motion.div>

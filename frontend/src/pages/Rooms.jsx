@@ -12,6 +12,7 @@ import { useAuth } from '../hooks/useAuth';
 import RoomCard from '../components/rooms/RoomCard';
 import CreateRoomDialog from '../components/rooms/CreateRoomDialog';
 import JoinRoomDialog from '../components/rooms/JoinRoomDialog';
+import { SkeletonCard } from '../components/common/SkeletonLoader';
 
 const Rooms = () => {
   const { user } = useAuth();
@@ -72,7 +73,11 @@ const Rooms = () => {
       )}
 
       {loading ? (
-        <Typography sx={{ color: '#64748B' }}>Loading rooms...</Typography>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr' }, gap: 3 }}>
+          {[0, 1, 2].map((i) => (
+            <SkeletonCard key={i} lines={3} height={80} />
+          ))}
+        </Box>
       ) : rooms.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 16 }}>
           <Box sx={{ width: 72, height: 72, borderRadius: 2.5, bgcolor: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 3 }}>

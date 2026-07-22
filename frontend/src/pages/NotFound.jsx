@@ -10,7 +10,9 @@ const NotFound = () => {
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
         <Typography variant="h1" sx={{ fontSize: { xs: 96, md: 140 }, fontWeight: 900, background: 'linear-gradient(135deg, #a5b4fc, #67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1, mb: 1 }}>404</Typography>
         <Typography variant="h5" sx={{ color: '#94A3B8', mb: 3 }}>Page not found</Typography>
-        <Button variant="contained" startIcon={<HomeIcon />} onClick={() => navigate('/')} sx={{ px: 3, borderRadius: 10 }}>Go Home</Button>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.25 }}>
+          <Button variant="contained" startIcon={<HomeIcon />} onClick={() => navigate('/')} sx={{ px: 3, borderRadius: 10 }}>Go Home</Button>
+        </motion.div>
       </motion.div>
     </Box>
   );

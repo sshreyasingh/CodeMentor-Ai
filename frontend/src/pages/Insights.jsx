@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Chip, LinearProgress, Button, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, LinearProgress, Button, Alert } from '@mui/material';
 import { motion } from 'framer-motion';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -7,6 +7,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
 import api from '../api/axios';
+import { SkeletonCard, SkeletonText } from '../components/common/SkeletonLoader';
 
 const SC = { high:'#ef4444', medium:'#f59e0b', low:'#818cf8' };
 const SL = { high:'High Priority', medium:'Medium Priority', low:'Low Priority' };
@@ -18,7 +19,19 @@ const Insights = () => {
   const [error,setError] = useState('');
   const fetch = async () => { setLoading(true);setError('');try { const { data: r } = await api.get('/insights');setData(r); } catch(e) { setError(e.response?.data?.message||'Failed'); } finally { setLoading(false); } };
   useEffect(() => { fetch(); }, []);
-  if(loading) return <Box sx={{ display:'flex',justifyContent:'center',alignItems:'center',minHeight:'60vh' }}><CircularProgress/></Box>;
+  if(loading) return (
+    <Box sx={{ display:'flex',flexDirection:'column',gap:3,p:{xs:2,md:4},maxWidth:1440,mx:'auto',width:'100%' }}>
+      <Box><SkeletonText lines={2} lineWidths={['30%','45%']}/></Box>
+      <Box sx={{ display:'flex',gap:3,flexWrap:'wrap' }}>
+        <Box sx={{ flex:'1 1 240px',minWidth:0 }}><SkeletonCard lines={2} height={80}/></Box>
+        <Box sx={{ flex:'2 1 500px',minWidth:0 }}><SkeletonCard lines={4} height={120}/></Box>
+      </Box>
+      <SkeletonText lines={1} lineWidths={['25%']}/>
+      <Box sx={{ display:'flex',flexWrap:'wrap',gap:3 }}>
+        {[0,1,2].map(i=><Box key={i} sx={{ flex:'1 1 320px',minWidth:0 }}><SkeletonCard lines={3} height={100}/></Box>)}
+      </Box>
+    </Box>
+  );
   if(error) return <Box sx={{ p:4 }}><Alert severity="error" action={<Button onClick={fetch}>Retry</Button>}>{error}</Alert></Box>;
   if(!data || data.totalReviews===0) return <Box sx={{ textAlign:'center',py:16 }}><LightbulbIcon sx={{ fontSize:72,color:'#475569',mb:3 }}/><Typography variant="h4" fontWeight={700} sx={{ color:'#94A3B8',mb:1 }}>No Insights Yet</Typography><Typography variant="body1" sx={{ color:'#64748B',maxWidth:500,mx:'auto' }}>Run code reviews to get personalized learning insights.</Typography></Box>;
 

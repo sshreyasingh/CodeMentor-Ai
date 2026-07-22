@@ -32,7 +32,7 @@ const JoinRoom = () => {
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', px: 2 }}>
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
         <Box sx={{ px: 5, py: 5, textAlign: 'center', maxWidth: 400, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3, bgcolor: 'rgba(12,18,35,0.85)', backdropFilter: 'blur(24px)' }}>
           <Typography variant="h5" sx={{ color: '#ef4444', mb: 1 }}>Could not join room</Typography>
           <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#475569', mb: 2 }}>#{roomId}</Typography>

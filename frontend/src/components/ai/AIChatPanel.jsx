@@ -81,14 +81,54 @@ const AIChatPanel = ({ code, language }) => {
   };
 
   const formatContent = (text) => {
-    return text
+    let html = text
       .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, codeBlock) => {
         return `<pre style="background:#0d1117;color:#e6edf3;padding:10px;border-radius:6px;overflow-x:auto;font-size:12px;font-family:monospace;margin:8px 0"><code>${escapeHtml(codeBlock.trim())}</code></pre>`;
       })
       .replace(/`([^`]+)`/g, '<code style="background:#1e293b;padding:1px 5px;border-radius:3px;font-size:12px">$1</code>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/\n/g, '<br/>');
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#818cf8;text-decoration:underline">$1</a>');
+
+    const lines = html.split('\n');
+    const result = [];
+    let inList = false;
+    let listTag = '';
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const numberedMatch = line.match(/^(\d+)\.\s(.+)$/);
+      const bulletMatch = line.match(/^[-*]\s(.+)$/);
+
+      if (numberedMatch) {
+        if (!inList || listTag !== 'ol') {
+          if (inList) result.push(`</${listTag}>`);
+          result.push('<ol style="padding-left:20px;margin:4px 0">');
+          inList = true;
+          listTag = 'ol';
+        }
+        result.push(`<li>${numberedMatch[2]}</li>`);
+      } else if (bulletMatch) {
+        if (!inList || listTag !== 'ul') {
+          if (inList) result.push(`</${listTag}>`);
+          result.push('<ul style="padding-left:20px;margin:4px 0">');
+          inList = true;
+          listTag = 'ul';
+        }
+        result.push(`<li>${bulletMatch[2]}</li>`);
+      } else {
+        if (inList) {
+          result.push(`</${listTag}>`);
+          inList = false;
+          listTag = '';
+        }
+        result.push(line.trim() ? line : '<br/>');
+      }
+    }
+
+    if (inList) result.push(`</${listTag}>`);
+
+    return result.join('\n');
   };
 
   const escapeHtml = (str) => {
