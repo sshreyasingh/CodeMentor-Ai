@@ -2,7 +2,7 @@ const Review = require('../models/review.model');
 const Insight = require('../models/insight.model');
 const env = require('../config/env');
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 const PATTERN_RULES = [
   {
@@ -178,14 +178,18 @@ const getAIInsightSummary = async (userId) => {
       .map((p) => `- ${p.label} (${p.count} occurrences, severity: ${p.severity})`)
       .join('\n');
 
-    const response = await fetch(GROQ_API_URL, {
+    if (!env.openrouterApiKey) return null;
+
+    const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${env.groqApiKey}`,
+        Authorization: `Bearer ${env.openrouterApiKey}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': env.clientUrl,
+        'X-Title': 'CodeMentor AI',
       },
       body: JSON.stringify({
-        model: 'deepseek-r1-distill-llama-70b',
+        model: 'deepseek/deepseek-chat',
         messages: [
           {
             role: 'system',
@@ -198,7 +202,7 @@ const getAIInsightSummary = async (userId) => {
           },
         ],
         temperature: 0.4,
-        max_completion_tokens: 400,
+        max_tokens: 400,
       }),
     });
 
